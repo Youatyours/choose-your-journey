@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Choose Your Journey — You at Yours</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Agdasima:wght@400;700&family=Open+Sans:wght@400;600;700&family=Cabin:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bare: #F5EEEB; --blush: #E0C9C9; --deep-blush: #D4B8B8; --espresso: #1F1514;
+    --charcoal: #292929; --coral: #F0523D; --hairline: #3A2C28; --muted: #C4A8A2; --radius: 3px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--espresso); color: var(--bare); font-family: 'Open Sans', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
+  .stage { width: 100%; max-width: 560px; }
+  .progress { display: flex; gap: 6px; margin-bottom: 26px; }
+  .progress-dot { height: 4px; flex: 1; background: var(--hairline); border-radius: 4px; transition: background 0.4s ease; }
+  .progress-dot.filled { background: var(--deep-blush); }
+  .progress-dot.ai { background: var(--coral); }
+  .card { background: #241A17; border: 1px solid var(--hairline); padding: 44px 40px; animation: fadeIn 0.4s ease; min-height: 300px; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { *, *::after { animation: none !important; transition: none !important; } }
+  .kicker { font-family: 'Cabin', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blush); margin-bottom: 16px; }
+  h1 { font-family: 'Agdasima', sans-serif; font-weight: 700; text-transform: uppercase; font-size: 34px; line-height: 1.15; letter-spacing: 0.01em; margin: 0 0 14px; color: var(--bare); }
+  .subcopy { color: var(--muted); font-size: 15.5px; line-height: 1.6; margin-bottom: 20px; }
+  .trust-line { font-family: 'Cabin', sans-serif; font-size: 12px; letter-spacing: 0.03em; color: var(--deep-blush); margin: -6px 0 26px; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option { text-align: left; background: transparent; border: 1px solid var(--hairline); color: var(--bare); font-family: 'Open Sans', sans-serif; font-size: 16px; padding: 16px 20px; cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; border-radius: var(--radius); }
+  .option:hover { border-color: var(--deep-blush); background: rgba(224,201,201,0.06); }
+  .option:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+  .cta-btn { background: var(--coral); color: var(--bare); border: none; padding: 16px 28px; font-family: 'Cabin', sans-serif; font-weight: 600; letter-spacing: 0.04em; font-size: 15px; cursor: pointer; border-radius: var(--radius); transition: opacity 0.2s ease; }
+  .cta-btn:hover { opacity: 0.88; }
+  .cta-secondary { background: transparent; color: var(--bare); border: 1px solid var(--deep-blush); padding: 16px 28px; font-family: 'Cabin', sans-serif; font-weight: 600; letter-spacing: 0.04em; font-size: 15px; cursor: pointer; border-radius: var(--radius); transition: border-color 0.2s ease; }
+  .cta-secondary:hover { border-color: var(--bare); }
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+  .developing { text-align: center; padding: 50px 10px; }
+  .developing-bar { width: 100%; height: 2px; background: var(--hairline); overflow: hidden; margin-top: 22px; }
+  .developing-bar::after { content: ''; display: block; height: 100%; width: 40%; background: var(--coral); animation: sweep 1.1s ease-in-out infinite; }
+  @keyframes sweep { 0% { transform: translateX(-100%); } 100% { transform: translateX(350%); } }
+  .reflection-box { border-left: 3px solid var(--coral); padding: 4px 0 4px 20px; margin-bottom: 20px; }
+  .reflection-box p { font-weight: 600; font-size: 19px; line-height: 1.45; color: var(--bare); margin: 0; }
+  .testimonial-card { display: flex; gap: 14px; margin-bottom: 8px; align-items: flex-start; }
+  .avatar { width: 40px; height: 40px; min-width: 40px; border-radius: 50%; background: var(--deep-blush); display: flex; align-items: center; justify-content: center; font-family: 'Agdasima', sans-serif; font-weight: 700; font-size: 18px; color: var(--espresso); }
+  .testimonial-text { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .testimonial-text strong { color: var(--bare); font-weight: 700; }
+  .people-heading { font-family: 'Cabin', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blush); margin: 4px 0 14px; }
+  .people-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 26px; }
+  .people-card { display: flex; flex-direction: column; }
+  .photo-placeholder { aspect-ratio: 4 / 5; border-radius: var(--radius); margin-bottom: 10px; background: linear-gradient(160deg, var(--blush), var(--deep-blush)); display: flex; align-items: center; justify-content: center; border: 1px solid var(--hairline); overflow: hidden; }
+  .photo-placeholder img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-placeholder span { font-family: 'Cabin', sans-serif; font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--espresso); opacity: 0.55; }
+  .people-caption { font-family: 'Cabin', sans-serif; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--blush); margin-bottom: 6px; }
+  .people-quote { font-size: 13px; color: var(--muted); line-height: 1.55; }
+  .reassure-list { margin: 0 0 30px; padding: 0; list-style: none; }
+  .reassure-list li { font-size: 14.5px; color: var(--muted); line-height: 1.6; padding: 10px 0; border-bottom: 1px solid var(--hairline); }
+  .reassure-list li:last-child { border-bottom: none; }
+  .reassure-list li strong { color: var(--bare); }
+  .email-form { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+  .email-form label { font-family: 'Cabin', sans-serif; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--blush); font-weight: 600; }
+  .email-form input { background: var(--espresso); border: 1px solid var(--hairline); color: var(--bare); padding: 14px 16px; font-size: 15px; border-radius: var(--radius); }
+  .confirm { text-align: center; padding: 20px 0 10px; }
+  .confirm p { color: var(--muted); font-size: 14.5px; line-height: 1.7; max-width: 380px; margin: 0 auto; }
+  .restart { margin-top: 22px; background: none; border: none; color: var(--muted); font-family: 'Cabin', sans-serif; font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; text-decoration: underline; padding: 0; }
+  .stories-grid { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+  @media (max-width: 480px) { .card { padding: 32px 24px; } h1 { font-size: 27px; } .people-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="progress" id="progress"></div>
+  <div class="card" id="card"></div>
+</div>
+
+<script>
+const TOTAL = 5;
+
+const Q1 = { kicker: 'Question 1 of 5', prompt: "Why are you here today?", sub: "There's no wrong answer. This just points us the right way.",
+  options: [
+    { label: "It's a gift, for a wedding, a birthday, a big celebration", bucket: 'standard' },
+    { label: "Something shifted and I'm ready to come back to myself", bucket: 'standard' },
+    { label: "I'm preparing for something medical, and I want to feel like myself again", bucket: 'sensitive' },
+    { label: "Honestly? Just curious", bucket: 'standard' }
+  ]};
+const Q2 = { kicker: 'Question 2 of 5', prompt: "How would you describe yourself?", sub: null,
+  options: [{ label: "Tall and slim" }, { label: "Curvy, some days I love it more than others" }, { label: "Petite" }, { label: "Still figuring that out" }]};
+const Q3_STANDARD = { kicker: 'Question 3 of 5', prompt: "What's actually held you back until now?", sub: null,
+  options: [{ label: "I hate having my photo taken" }, { label: "I don't think I'm photogenic" }, { label: "I wouldn't know what to wear or how to pose" }, { label: "Just nervous, plain and simple" }]};
+const Q3_SENSITIVE = { kicker: 'Question 3 of 5', prompt: "What feels hardest about doing this right now?", sub: null,
+  options: [{ label: "Just showing up feels like a lot" }, { label: "I don't want to think too much about my body right now" }, { label: "I'm not sure what I'll feel when I see the photos" }, { label: "Having control over something feels good right now" }]};
+const Q4_SENSITIVE_STATIC = { kicker: 'Question 4 of 5', prompt: "What would help you feel supported through this?", sub: null,
+  options: [{ label: "Someone explaining each step as we go" }, { label: "Time to just breathe if I need it" }, { label: "Not being rushed at any point" }, { label: "Knowing I can pause any time" }]};
+const Q5 = { kicker: 'Question 5 of 5', prompt: "What would feel like real ease, at the end of this?", sub: null,
+  options: [{ label: "Feeling present, even just for an hour" }, { label: "Photos that feel like truth, not performance" }, { label: "Proving to myself I can do hard things" }, { label: "Being held through the whole thing" }]};
+
+// TESTIMONIALS: replace this whole array with real entries pulled from your spreadsheet.
+// Each entry needs: name, tags (must exactly match the option labels above), feeling, line, and optionally an image URL.
+const TESTIMONIALS = [
+  { name: 'A.', tags: ['Tall and slim', "I hate having my photo taken"], feeling: 'camera shy', line: "I expected a shoot. I got a version of myself I'd been avoiding for years.", image: null },
+  { name: 'J.', tags: ['Tall and slim', "I don't think I'm photogenic"], feeling: 'not photogenic, in her own words', line: "I always thought the camera just didn't like me. Turns out I'd never been seen properly.", image: null },
+  { name: 'F.', tags: ['Curvy, some days I love it more than others', "I don't think I'm photogenic"], feeling: 'not feeling photogenic', line: "Beyond safe, beyond respected. I didn't know a photoshoot could feel like that.", image: null },
+  { name: 'R.', tags: ['Curvy, some days I love it more than others', "Just nervous, plain and simple"], feeling: 'just plain nervous', line: "I nearly cancelled twice. So glad I didn't.", image: null },
+  { name: 'M.', tags: ['Petite', "I wouldn't know what to wear or how to pose"], feeling: 'unsure how to pose', line: "It's not about the photos. It's about meeting a version of myself I didn't know existed.", image: null },
+  { name: 'S.', tags: ['Petite', "I hate having my photo taken"], feeling: 'camera shy', line: "I've dodged cameras my whole life. This was the first one I asked to see twice.", image: null },
+  { name: 'C.', tags: ['Still figuring that out', "Just nervous, plain and simple"], feeling: 'just plain nervous', line: "Merv genuinely cared. I left feeling more myself than I had in years.", image: null },
+  { name: 'D.', tags: ['Still figuring that out', "I don't think I'm photogenic"], feeling: 'not photogenic, in her own words', line: "I still don't fully know how to describe myself. The photos did it for me.", image: null }
+];
+
+const SENSITIVE_TESTIMONIAL = { name: 'N.', line: "I didn't want it to be a big thing. Merv let it not be a big thing, and somehow that helped more than anything." };
+
+let answers = {};
+let bucket = 'standard';
+let step = 0;
+
+function trackEvent(name, data) {
+  const payload = Object.assign({ event: name }, data || {});
+  if (window.dataLayer) window.dataLayer.push(payload);
+  console.log('[track]', payload);
+}
+
+function withTimeout(promise, ms) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('timeout')), ms);
+    promise.then((v) => { clearTimeout(timer); resolve(v); }, (e) => { clearTimeout(timer); reject(e); });
+  });
+}
+
+async function callApi(action) {
+  const payload = { motive: answers.motive, body: answers.body, block: answers.block, dynamic: answers.dynamic, win: answers.win };
+  const res = await withTimeout(fetch('/api/quiz', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, answers: payload })
+  }), 15000);
+  if (!res.ok) throw new Error('API request failed');
+  const data = await res.json();
+  return data.text || '';
+}
+
+function renderProgress() {
+  const el = document.getElementById('progress');
+  el.innerHTML = '';
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    const filled = i < step - 1;
+    const isAi = (i === 3 && bucket === 'standard');
+    d.className = 'progress-dot' + (filled ? (isAi ? ' ai' : ' filled') : '');
+    el.appendChild(d);
+  }
+}
+
+function renderIntro() {
+  document.getElementById('card').innerHTML = `
+    <div class="kicker">Choose Your Journey</div>
+    <h1>Come back to your body</h1>
+    <p class="subcopy">We know where you are right now, and we want to honour this space for you. Tell us about you, and why you're here, and let us point you in the right direction.</p>
+    <p class="trust-line">Everything you share here stays private, until you say otherwise.</p>
+    <button class="cta-btn" id="beginBtn">Let's go</button>
+  `;
+  document.getElementById('beginBtn').addEventListener('click', () => { trackEvent('quiz_started'); step = 1; renderProgress(); renderQuestion(Q1, 'motive'); });
+}
+
+function renderQuestion(q, key) {
+  const card = document.getElementById('card');
+  card.innerHTML = `
+    <div class="kicker">${q.kicker}</div>
+    <h1>${q.prompt}</h1>
+    ${q.sub ? `<p class="subcopy">${q.sub}</p>` : ''}
+    <div class="options">${q.options.map((o, i) => `<button class="option" data-i="${i}">${o.label}</button>`).join('')}</div>
+  `;
+  card.querySelectorAll('.option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const opt = q.options[parseInt(btn.dataset.i)];
+      answers[key] = opt.label;
+      if (key === 'motive') bucket = opt.bucket;
+      trackEvent('question_answered', { question: key, answer: opt.label, bucket });
+      step++; renderProgress(); advanceTo(key);
+    });
+  });
+}
+
+function advanceTo(key) {
+  if (key === 'motive') return renderQuestion(Q2, 'body');
+  if (key === 'body') return renderQuestion(bucket === 'sensitive' ? Q3_SENSITIVE : Q3_STANDARD, 'block');
+  if (key === 'block') { if (bucket === 'sensitive') return renderQuestion(Q4_SENSITIVE_STATIC, 'support'); return renderDynamicQuestion(); }
+  if (key === 'dynamic' || key === 'support') return renderQuestion(Q5, 'win');
+  if (key === 'win') { renderDeveloping(); generateReflection(); }
+}
+
+async function renderDynamicQuestion() {
+  const card = document.getElementById('card');
+  card.innerHTML = `<div class="kicker">Question 4 of 5</div><h1 style="opacity:0.4;">One sec</h1><div class="developing-bar"></div>`;
+
+  let parsed = null, usedFallback = false;
+  try {
+    const raw = await callApi('dynamic_question');
+    const clean = raw.replace(/```json|```/g, '').trim();
+    parsed = JSON.parse(clean);
+    if (!parsed.question || !Array.isArray(parsed.options) || parsed.options.length < 2) parsed = null;
+  } catch (err) { parsed = null; }
+
+  if (!parsed) {
+    usedFallback = true;
+    parsed = { question: "What would help you feel most at ease on the day?", options: ["Knowing exactly what to expect", "Music, and no rush", "Bringing a friend along", "Being told I look good, often"] };
+  }
+  trackEvent('ai_question_shown', { fallback: usedFallback });
+
+  const card2 = document.getElementById('card');
+  card2.innerHTML = `<div class="kicker">Question 4 of 5</div><h1>${parsed.question}</h1><div class="options">${parsed.options.map((label, i) => `<button class="option" data-i="${i}">${label}</button>`).join('')}</div>`;
+  card2.querySelectorAll('.option').forEach(btn => {
+    btn.addEventListener('click', () => {
+      answers.dynamic = parsed.options[parseInt(btn.dataset.i)];
+      trackEvent('question_answered', { question: 'dynamic', answer: answers.dynamic });
+      step++; renderProgress(); advanceTo('dynamic');
+    });
+  });
+}
+
+function renderDeveloping() {
+  document.getElementById('card').innerHTML = `<div class="developing"><div class="kicker">One sec</div><p class="subcopy" style="margin-bottom:0;">Putting together something that's actually about you.</p><div class="developing-bar"></div></div>`;
+}
+
+function matchTestimonials(count) {
+  const scored = TESTIMONIALS.map(t => ({ t, score: [answers.body, answers.block].filter(a => t.tags.includes(a)).length }));
+  scored.sort((a, b) => b.score - a.score);
+  return scored.slice(0, count).map(s => s.t);
+}
+
+async function generateReflection() {
+  if (bucket === 'sensitive') { trackEvent('reflection_shown', { bucket: 'sensitive', fallback: false }); renderSensitiveReflection(); return; }
+  let reflection, usedFallback = false;
+  try {
+    reflection = await callApi('reflection');
+    if (!reflection) reflection = fallback();
+  } catch (err) { reflection = fallback(); usedFallback = true; }
+  trackEvent('reflection_shown', { bucket: 'standard', fallback: usedFallback });
+  renderReflection(reflection, matchTestimonials(2));
+}
+
+function fallback() { return "You have been carrying this quietly for a while. That is exactly who this was built for."; }
+
+function photoTile(t) {
+  return t.image ? `<img src="${t.image}" alt="">` : `<span>Photo of ${t.name}</span>`;
+}
+
+function renderReflection(reflection, matches) {
+  const card = document.getElementById('card');
+  card.innerHTML = `
+    <div class="kicker">Here's what we're hearing</div>
+    <div class="reflection-box"><p>${reflection}</p></div>
+    <p class="subcopy" style="margin-bottom:20px;">You're not the only one who's felt this. It's exactly why this space exists.</p>
+    <div class="people-heading">People just like you</div>
+    <div class="people-grid">
+      ${matches.map(t => `<div class="people-card"><div class="photo-placeholder">${photoTile(t)}</div><div class="people-caption">${t.name}, also felt ${t.feeling}</div><div class="people-quote">"${t.line}"</div></div>`).join('')}
+    </div>
+    <div class="btn-row" style="margin-top:6px;"><button class="cta-btn" id="continueBtn">Keep going</button></div>
+  `;
+  document.getElementById('continueBtn').addEventListener('click', () => renderReassure(matches.map(m => m.name)));
+}
+
+function renderSensitiveReflection() {
+  document.getElementById('card').innerHTML = `
+    <div class="kicker">Here's what we're hearing</div>
+    <div class="reflection-box"><p>Whatever this moment holds for you, you do not have to carry it alone.</p></div>
+    <p class="subcopy" style="margin-bottom:20px;">You're not the only one who's felt this. It's exactly why this space exists.</p>
+    <div class="testimonial-card"><div class="avatar">${SENSITIVE_TESTIMONIAL.name[0]}</div><div class="testimonial-text"><strong>${SENSITIVE_TESTIMONIAL.name}</strong>: "${SENSITIVE_TESTIMONIAL.line}"</div></div>
+    <div class="btn-row" style="margin-top:26px;"><button class="cta-btn" id="continueBtn">Keep going</button></div>
+  `;
+  document.getElementById('continueBtn').addEventListener('click', () => renderReassure([SENSITIVE_TESTIMONIAL.name]));
+}
+
+function renderReassure(excludeNames) {
+  trackEvent('consent_screen_shown');
+  document.getElementById('card').innerHTML = `
+    <div class="kicker">Before anything else</div>
+    <h1>No pressure. Truly.</h1>
+    <ul class="reassure-list">
+      <li><strong>Consent and privacy come first.</strong> Nothing about your session is shared without your say so.</li>
+      <li><strong>You do not need to be a model.</strong> Whatever your shape, whatever your size, that is the whole point.</li>
+      <li><strong>Merv holds every call himself.</strong> Fifteen minutes, no script, no sales pitch, just a safe space for the two of you to connect and for you to ask what is on your mind.</li>
+    </ul>
+    <div class="btn-row"><button class="cta-btn" id="callBtn">Find me a time</button><button class="cta-secondary" id="storiesBtn">Show me more stories first</button></div>
+  `;
+  document.getElementById('callBtn').addEventListener('click', renderEmailForm);
+  document.getElementById('storiesBtn').addEventListener('click', () => renderStories(excludeNames));
+}
+
+function renderStories(excludeNames) {
+  trackEvent('stories_shown');
+  const pool = TESTIMONIALS.filter(t => !excludeNames.includes(t.name));
+  document.getElementById('card').innerHTML = `
+    <div class="kicker">A few more, real ones</div>
+    <h1>Nobody here was a model</h1>
+    <div class="stories-grid">${pool.map(t => `<div class="testimonial-card"><div class="avatar">${t.name[0]}</div><div class="testimonial-text"><strong>${t.name}</strong>: "${t.line}"</div></div>`).join('')}</div>
+    <div class="btn-row"><button class="cta-btn" id="readyBtn">Okay, find me a time</button><button class="cta-secondary" id="restartBtn0">Start over</button></div>
+  `;
+  document.getElementById('readyBtn').addEventListener('click', renderEmailForm);
+  document.getElementById('restartBtn0').addEventListener('click', resetQuiz);
+}
+
+function renderEmailForm() {
+  document.getElementById('card').innerHTML = `
+    <div class="kicker">Almost there</div>
+    <h1>Where should we send your time?</h1>
+    <form class="email-form" id="emailForm">
+      <label for="emailInput">Email</label>
+      <input type="email" id="emailInput" placeholder="you@email.com" required>
+      <button type="submit" class="cta-btn" style="margin-top:8px;">Find me a time</button>
+    </form>
+    <button class="restart" id="restartBtn1">Start over</button>
+  `;
+  document.getElementById('emailForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('emailInput').value;
+    try {
+      await fetch('/api/lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, answers, bucket }) });
+    } catch (err) { /* still show confirmation even if the lead write fails */ }
+    trackEvent('email_submitted');
+    renderConfirm();
+  });
+  document.getElementById('restartBtn1').addEventListener('click', resetQuiz);
+}
+
+function renderConfirm() {
+  document.getElementById('card').innerHTML = `
+    <div class="confirm"><div class="kicker">Got it</div><h1 style="font-size:28px; margin-bottom:14px;">We'll be in touch soon</h1><p>No pitch, no pressure. The YAY team.</p><button class="restart" id="restartBtn2">Take it again</button></div>
+  `;
+  document.getElementById('restartBtn2').addEventListener('click', resetQuiz);
+}
+
+function resetQuiz() { trackEvent('quiz_restarted'); answers = {}; bucket = 'standard'; step = 0; renderIntro(); }
+
+renderIntro();
+</script>
+</body>
+</html>
