@@ -21,6 +21,8 @@
   .card { background: #241A17; border: 1px solid var(--hairline); padding: 44px 40px; animation: fadeIn 0.4s ease; min-height: 300px; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   @media (prefers-reduced-motion: reduce) { *, *::after { animation: none !important; transition: none !important; } }
+  .back-btn { background: none; border: none; color: var(--muted); font-family: 'Cabin', sans-serif; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; cursor: pointer; padding: 0; margin-bottom: 18px; display: inline-flex; align-items: center; gap: 6px; }
+  .back-btn:hover { color: var(--bare); }
   .kicker { font-family: 'Cabin', sans-serif; font-weight: 600; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blush); margin-bottom: 16px; }
   h1 { font-family: 'Agdasima', sans-serif; font-weight: 700; text-transform: uppercase; font-size: 34px; line-height: 1.15; letter-spacing: 0.01em; margin: 0 0 14px; color: var(--bare); }
   .subcopy { color: var(--muted); font-size: 15.5px; line-height: 1.6; margin-bottom: 20px; }
@@ -29,6 +31,7 @@
   .option { text-align: left; background: transparent; border: 1px solid var(--hairline); color: var(--bare); font-family: 'Open Sans', sans-serif; font-size: 16px; padding: 16px 20px; cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease; border-radius: var(--radius); }
   .option:hover { border-color: var(--deep-blush); background: rgba(224,201,201,0.06); }
   .option:focus-visible { outline: 2px solid var(--coral); outline-offset: 2px; }
+  .option.muted-option { border-style: dashed; color: var(--muted); }
   .cta-btn { background: var(--coral); color: var(--bare); border: none; padding: 16px 28px; font-family: 'Cabin', sans-serif; font-weight: 600; letter-spacing: 0.04em; font-size: 15px; cursor: pointer; border-radius: var(--radius); transition: opacity 0.2s ease; }
   .cta-btn:hover { opacity: 0.88; }
   .cta-secondary { background: transparent; color: var(--bare); border: 1px solid var(--deep-blush); padding: 16px 28px; font-family: 'Cabin', sans-serif; font-weight: 600; letter-spacing: 0.04em; font-size: 15px; cursor: pointer; border-radius: var(--radius); transition: border-color 0.2s ease; }
@@ -73,44 +76,94 @@
 </div>
 
 <script>
-const TOTAL = 5;
+const TOTAL = 8;
+const AI_STEPS = [4, 6, 7]; // three AI-generated steps for the standard bucket
 
-const Q1 = { kicker: 'Question 1 of 5', prompt: "Why are you here today?", sub: "There's no wrong answer. This just points us the right way.",
+const Q1 = { kicker: 'Question 1 of 8', prompt: "Why are you here today?", sub: "There's no wrong answer. This just points us the right way.",
   options: [
-    { label: "It's a gift, for a wedding, a birthday, a big celebration", bucket: 'standard' },
-    { label: "Something shifted and I'm ready to come back to myself", bucket: 'standard' },
-    { label: "I'm preparing for something medical, and I want to feel like myself again", bucket: 'sensitive' },
-    { label: "Honestly? Just curious", bucket: 'standard' }
+    { label: "It's a gift, for a wedding, a birthday, a big celebration", bucket: 'standard', type: 'gift' },
+    { label: "Something shifted and I'm ready to come back to myself", bucket: 'standard', type: 'self' },
+    { label: "I'm preparing for something medical, and I want to feel like myself again", bucket: 'sensitive', type: 'sensitive' },
+    { label: "Honestly? Just curious", bucket: 'standard', type: 'curious' }
   ]};
-const Q2 = { kicker: 'Question 2 of 5', prompt: "How would you describe yourself?", sub: null,
-  options: [{ label: "Tall and slim" }, { label: "Curvy, some days I love it more than others" }, { label: "Petite" }, { label: "Still figuring that out" }]};
-const Q3_STANDARD = { kicker: 'Question 3 of 5', prompt: "What's actually held you back until now?", sub: null,
-  options: [{ label: "I hate having my photo taken" }, { label: "I don't think I'm photogenic" }, { label: "I wouldn't know what to wear or how to pose" }, { label: "Just nervous, plain and simple" }]};
-const Q3_SENSITIVE = { kicker: 'Question 3 of 5', prompt: "What feels hardest about doing this right now?", sub: null,
-  options: [{ label: "Just showing up feels like a lot" }, { label: "I don't want to think too much about my body right now" }, { label: "I'm not sure what I'll feel when I see the photos" }, { label: "Having control over something feels good right now" }]};
-const Q4_SENSITIVE_STATIC = { kicker: 'Question 4 of 5', prompt: "What would help you feel supported through this?", sub: null,
-  options: [{ label: "Someone explaining each step as we go" }, { label: "Time to just breathe if I need it" }, { label: "Not being rushed at any point" }, { label: "Knowing I can pause any time" }]};
-const Q5 = { kicker: 'Question 5 of 5', prompt: "What would feel like real ease, at the end of this?", sub: null,
-  options: [{ label: "Feeling present, even just for an hour" }, { label: "Photos that feel like truth, not performance" }, { label: "Proving to myself I can do hard things" }, { label: "Being held through the whole thing" }]};
+const Q2 = { kicker: 'Question 2 of 8', prompt: "What's your usual dress size?", sub: "This just helps us prep styling and outfit options that'll actually fit you, nothing more.",
+  options: [
+    { label: "UK 6-8" }, { label: "UK 10-12" }, { label: "UK 14-16" }, { label: "UK 18-20" }, { label: "UK 22+" }, { label: "Prefer not to say", muted: true }
+  ]};
+const Q3_STANDARD = { kicker: 'Question 3 of 8', prompt: "What's actually held you back until now?", sub: null,
+  options: [
+    { label: "I hate having my photo taken" }, { label: "I don't think I'm photogenic" }, { label: "I wouldn't know what to wear or how to pose" }, { label: "Just nervous, plain and simple" }, { label: "Prefer not to say", muted: true }
+  ]};
+const Q3_SENSITIVE = { kicker: 'Question 3 of 8', prompt: "What feels hardest about doing this right now?", sub: null,
+  options: [
+    { label: "Just showing up feels like a lot" }, { label: "I don't want to think too much about my body right now" }, { label: "I'm not sure what I'll feel when I see the photos" }, { label: "Having control over something feels good right now" }, { label: "Prefer not to say", muted: true }
+  ]};
+const Q4_SENSITIVE = { kicker: 'Question 4 of 8', prompt: "What would help you feel supported through this?", sub: null,
+  options: [
+    { label: "Someone explaining each step as we go" }, { label: "Time to just breathe if I need it" }, { label: "Not being rushed at any point" }, { label: "Knowing I can pause any time" }
+  ]};
+const Q5_SELF = { kicker: 'Question 5 of 8', prompt: "When do you feel most like yourself?", sub: null,
+  options: [
+    { label: "First thing in the morning, no one watching" }, { label: "After a really good conversation" }, { label: "When no one's asking anything of me" }, { label: "Honestly, not sure lately" }
+  ]};
+const Q6_SENSITIVE = { kicker: 'Question 6 of 8', prompt: "What pace would feel right for you?", sub: null,
+  options: [
+    { label: "Slow, with lots of check ins" }, { label: "Steady, but gentle" }, { label: "However feels natural in the moment" }, { label: "I'd rather not think about pace" }
+  ]};
+const Q7_SENSITIVE = { kicker: 'Question 7 of 8', prompt: "What would help you feel supported afterward, once it's done?", sub: null,
+  options: [
+    { label: "Someone to talk to about how it felt" }, { label: "Space and quiet, no debrief needed" }, { label: "Photos I can look at whenever I'm ready" }, { label: "Just knowing it's over, however it went" }
+  ]};
+const Q8_WIN = { kicker: 'Question 8 of 8', prompt: "What do you want to walk away with?", sub: null,
+  options: [
+    { label: "Proof I can do hard things" }, { label: "Photos I actually love" }, { label: "A version of me I want to remember" }, { label: "Something to look back on and feel proud of" }
+  ]};
 
-// TESTIMONIALS: replace this whole array with real entries pulled from your spreadsheet.
-// Each entry needs: name, tags (must exactly match the option labels above), feeling, line, and optionally an image URL.
+const DYNAMIC_FALLBACKS = {
+  4: {
+    question: "What would help you feel most at ease on the day?",
+    options: ["Knowing exactly what to expect", "A coffee before we start", "Posing guidance, step by step", "Music, and no rush"]
+  },
+  6: {
+    question: "What matters most to you about how this feels?",
+    options: ["That it feels unhurried", "That it feels playful, not serious", "That it feels private, just us", "That it feels like my choice, start to finish"]
+  },
+  7: {
+    question: "What would help you feel proud walking out?",
+    options: ["Knowing I showed up as myself", "Having tried something new", "Trusting the process, even the awkward bits", "Simply finishing what I started"]
+  }
+};
+
+// TESTIMONIALS: replace this whole array with real entries from the tagged spreadsheet.
+// Tag 1 must exactly match a Q2 dress size label, Tag 2 must exactly match a Q3 label.
 const TESTIMONIALS = [
-  { name: 'A.', tags: ['Tall and slim', "I hate having my photo taken"], feeling: 'camera shy', line: "I expected a shoot. I got a version of myself I'd been avoiding for years.", image: null },
-  { name: 'J.', tags: ['Tall and slim', "I don't think I'm photogenic"], feeling: 'not photogenic, in her own words', line: "I always thought the camera just didn't like me. Turns out I'd never been seen properly.", image: null },
-  { name: 'F.', tags: ['Curvy, some days I love it more than others', "I don't think I'm photogenic"], feeling: 'not feeling photogenic', line: "Beyond safe, beyond respected. I didn't know a photoshoot could feel like that.", image: null },
-  { name: 'R.', tags: ['Curvy, some days I love it more than others', "Just nervous, plain and simple"], feeling: 'just plain nervous', line: "I nearly cancelled twice. So glad I didn't.", image: null },
-  { name: 'M.', tags: ['Petite', "I wouldn't know what to wear or how to pose"], feeling: 'unsure how to pose', line: "It's not about the photos. It's about meeting a version of myself I didn't know existed.", image: null },
-  { name: 'S.', tags: ['Petite', "I hate having my photo taken"], feeling: 'camera shy', line: "I've dodged cameras my whole life. This was the first one I asked to see twice.", image: null },
-  { name: 'C.', tags: ['Still figuring that out', "Just nervous, plain and simple"], feeling: 'just plain nervous', line: "Merv genuinely cared. I left feeling more myself than I had in years.", image: null },
-  { name: 'D.', tags: ['Still figuring that out', "I don't think I'm photogenic"], feeling: 'not photogenic, in her own words', line: "I still don't fully know how to describe myself. The photos did it for me.", image: null }
+  { name: 'A.', tags: ['UK 6-8', "I hate having my photo taken"], feeling: 'camera shy', line: "I expected a shoot. I got a version of myself I'd been avoiding for years.", image: null },
+  { name: 'J.', tags: ['UK 6-8', "I don't think I'm photogenic"], feeling: 'not photogenic, in her own words', line: "I always thought the camera just didn't like me. Turns out I'd never been seen properly.", image: null },
+  { name: 'F.', tags: ['UK 14-16', "I don't think I'm photogenic"], feeling: 'not feeling photogenic', line: "Beyond safe, beyond respected. I didn't know a photoshoot could feel like that.", image: null },
+  { name: 'R.', tags: ['UK 14-16', "Just nervous, plain and simple"], feeling: 'just plain nervous', line: "I nearly cancelled twice. So glad I didn't.", image: null },
+  { name: 'M.', tags: ['UK 10-12', "I wouldn't know what to wear or how to pose"], feeling: 'unsure how to pose', line: "It's not about the photos. It's about meeting a version of myself I didn't know existed.", image: null },
+  { name: 'S.', tags: ['UK 10-12', "I hate having my photo taken"], feeling: 'camera shy', line: "I've dodged cameras my whole life. This was the first one I asked to see twice.", image: null },
+  { name: 'C.', tags: ['UK 18-20', "Just nervous, plain and simple"], feeling: 'just plain nervous', line: "Merv genuinely cared. I left feeling more myself than I had in years.", image: null },
+  { name: 'D.', tags: ['UK 18-20', "I don't think I'm photogenic"], feeling: 'not photogenic, in her own words', line: "I still don't fully know how to describe myself. The photos did it for me.", image: null }
 ];
 
 const SENSITIVE_TESTIMONIAL = { name: 'N.', line: "I didn't want it to be a big thing. Merv let it not be a big thing, and somehow that helped more than anything." };
 
+const MOTIVE_LINES = {
+  gift: "Whoever this ends up being for, gift or not, it starts with you saying yes.",
+  self: "This is your moment to come back to yourself, whenever you're ready for it.",
+  curious: "No commitment yet. Fifteen minutes is just enough to see if this is right for you.",
+  sensitive: "Whatever's ahead for you, this can be one steady thing in the middle of it."
+};
+
+const PROOF_POINTS = "750+ sessions &middot; 3&times; London's Best Boudoir Photographer &middot; Featured in Forbes &amp; BBC Radio London";
+
 let answers = {};
+let history = []; // ordered list of { question, answer }, used as AI context
 let bucket = 'standard';
-let step = 0;
+let motiveType = 'self';
+let step = 1;
+let dynamicCache = {}; // { stepNumber: { question, options } }
 
 function trackEvent(name, data) {
   const payload = Object.assign({ event: name }, data || {});
@@ -126,10 +179,9 @@ function withTimeout(promise, ms) {
 }
 
 async function callApi(action) {
-  const payload = { motive: answers.motive, body: answers.body, block: answers.block, dynamic: answers.dynamic, win: answers.win };
   const res = await withTimeout(fetch('/api/quiz', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action, answers: payload })
+    body: JSON.stringify({ action, history })
   }), 15000);
   if (!res.ok) throw new Error('API request failed');
   const data = await res.json();
@@ -142,75 +194,127 @@ function renderProgress() {
   for (let i = 0; i < TOTAL; i++) {
     const d = document.createElement('div');
     const filled = i < step - 1;
-    const isAi = (i === 3 && bucket === 'standard');
+    const isAi = bucket === 'standard' && AI_STEPS.includes(i + 1);
     d.className = 'progress-dot' + (filled ? (isAi ? ' ai' : ' filled') : '');
     el.appendChild(d);
   }
 }
 
-function renderIntro() {
-  document.getElementById('card').innerHTML = `
-    <div class="kicker">Choose Your Journey</div>
-    <h1>Come back to your body</h1>
-    <p class="subcopy">We know where you are right now, and we want to honour this space for you. Tell us about you, and why you're here, and let us point you in the right direction.</p>
-    <p class="trust-line">Everything you share here stays private, until you say otherwise.</p>
-    <button class="cta-btn" id="beginBtn">Let's go</button>
-  `;
-  document.getElementById('beginBtn').addEventListener('click', () => { trackEvent('quiz_started'); step = 1; renderProgress(); renderQuestion(Q1, 'motive'); });
+function getFlow() {
+  if (bucket === 'sensitive') {
+    return [
+      { type: 'static', q: Q1, key: 'motive' },
+      { type: 'static', q: Q2, key: 'body' },
+      { type: 'static', q: Q3_SENSITIVE, key: 'block' },
+      { type: 'static', q: Q4_SENSITIVE, key: 'support1' },
+      { type: 'static', q: Q5_SELF, key: 'self' },
+      { type: 'static', q: Q6_SENSITIVE, key: 'pace' },
+      { type: 'static', q: Q7_SENSITIVE, key: 'support2' },
+      { type: 'static', q: Q8_WIN, key: 'win' }
+    ];
+  }
+  return [
+    { type: 'static', q: Q1, key: 'motive' },
+    { type: 'static', q: Q2, key: 'body' },
+    { type: 'static', q: Q3_STANDARD, key: 'block' },
+    { type: 'ai', key: 'ai1' },
+    { type: 'static', q: Q5_SELF, key: 'self' },
+    { type: 'ai', key: 'ai2' },
+    { type: 'ai', key: 'ai3' },
+    { type: 'static', q: Q8_WIN, key: 'win' }
+  ];
 }
 
-function renderQuestion(q, key) {
+function backButtonHtml() {
+  return step > 1 ? `<button class="back-btn" id="backBtn">&larr; Back</button>` : '';
+}
+
+function attachBack() {
+  const btn = document.getElementById('backBtn');
+  if (btn) btn.addEventListener('click', goBack);
+}
+
+function goBack() {
+  if (step <= 1) return;
+  const flow = getFlow();
+  const leavingKey = flow[step - 1].key;
+  delete answers[leavingKey];
+  history.pop();
+  step--;
+  renderProgress();
+  renderStep(step);
+}
+
+function renderStep(n) {
+  const flow = getFlow();
+  const stepDef = flow[n - 1];
+  if (stepDef.type === 'static') return renderQuestion(stepDef.q, stepDef.key, n === 1, n);
+  return renderAiStep(n, stepDef.key);
+}
+
+function renderQuestion(q, key, showTrust, n) {
   const card = document.getElementById('card');
   card.innerHTML = `
+    ${backButtonHtml()}
     <div class="kicker">${q.kicker}</div>
     <h1>${q.prompt}</h1>
     ${q.sub ? `<p class="subcopy">${q.sub}</p>` : ''}
-    <div class="options">${q.options.map((o, i) => `<button class="option" data-i="${i}">${o.label}</button>`).join('')}</div>
+    ${showTrust ? `<p class="trust-line">Everything you share here stays private, until you say otherwise.</p>` : ''}
+    <div class="options">${q.options.map((o, i) => `<button class="option${o.muted ? ' muted-option' : ''}" data-i="${i}">${o.label}</button>`).join('')}</div>
   `;
+  attachBack();
   card.querySelectorAll('.option').forEach(btn => {
     btn.addEventListener('click', () => {
       const opt = q.options[parseInt(btn.dataset.i)];
       answers[key] = opt.label;
-      if (key === 'motive') bucket = opt.bucket;
-      trackEvent('question_answered', { question: key, answer: opt.label, bucket });
-      step++; renderProgress(); advanceTo(key);
+      history.push({ question: q.prompt, answer: opt.label });
+      if (key === 'motive') { bucket = opt.bucket; motiveType = opt.type; }
+      trackEvent('question_answered', { question: key, answer: opt.label, bucket, step });
+      advance(n);
     });
   });
 }
 
-function advanceTo(key) {
-  if (key === 'motive') return renderQuestion(Q2, 'body');
-  if (key === 'body') return renderQuestion(bucket === 'sensitive' ? Q3_SENSITIVE : Q3_STANDARD, 'block');
-  if (key === 'block') { if (bucket === 'sensitive') return renderQuestion(Q4_SENSITIVE_STATIC, 'support'); return renderDynamicQuestion(); }
-  if (key === 'dynamic' || key === 'support') return renderQuestion(Q5, 'win');
-  if (key === 'win') { renderDeveloping(); generateReflection(); }
+function advance(n) {
+  if (n >= TOTAL) { renderDeveloping(); generateReflection(); return; }
+  step = n + 1;
+  renderProgress();
+  renderStep(step);
 }
 
-async function renderDynamicQuestion() {
+async function renderAiStep(n, key) {
+  if (dynamicCache[n]) return renderCachedAiStep(n, key);
+
   const card = document.getElementById('card');
-  card.innerHTML = `<div class="kicker">Question 4 of 5</div><h1 style="opacity:0.4;">One sec</h1><div class="developing-bar"></div>`;
+  card.innerHTML = `${backButtonHtml()}<div class="kicker">Question ${n} of 8</div><h1 style="opacity:0.4;">One sec</h1><div class="developing-bar"></div>`;
+  attachBack();
 
   let parsed = null, usedFallback = false;
   try {
-    const raw = await callApi('dynamic_question');
+    const raw = await callApi('next_question');
     const clean = raw.replace(/```json|```/g, '').trim();
     parsed = JSON.parse(clean);
     if (!parsed.question || !Array.isArray(parsed.options) || parsed.options.length < 2) parsed = null;
   } catch (err) { parsed = null; }
 
-  if (!parsed) {
-    usedFallback = true;
-    parsed = { question: "What would help you feel most at ease on the day?", options: ["Knowing exactly what to expect", "Music, and no rush", "Bringing a friend along", "Being told I look good, often"] };
-  }
-  trackEvent('ai_question_shown', { fallback: usedFallback });
+  if (!parsed) { usedFallback = true; parsed = DYNAMIC_FALLBACKS[n]; }
+  dynamicCache[n] = parsed;
+  trackEvent('ai_question_shown', { fallback: usedFallback, step: n });
+  renderCachedAiStep(n, key);
+}
 
-  const card2 = document.getElementById('card');
-  card2.innerHTML = `<div class="kicker">Question 4 of 5</div><h1>${parsed.question}</h1><div class="options">${parsed.options.map((label, i) => `<button class="option" data-i="${i}">${label}</button>`).join('')}</div>`;
-  card2.querySelectorAll('.option').forEach(btn => {
+function renderCachedAiStep(n, key) {
+  const parsed = dynamicCache[n];
+  const card = document.getElementById('card');
+  card.innerHTML = `${backButtonHtml()}<div class="kicker">Question ${n} of 8</div><h1>${parsed.question}</h1><div class="options">${parsed.options.map((label, i) => `<button class="option" data-i="${i}">${label}</button>`).join('')}</div>`;
+  attachBack();
+  card.querySelectorAll('.option').forEach(btn => {
     btn.addEventListener('click', () => {
-      answers.dynamic = parsed.options[parseInt(btn.dataset.i)];
-      trackEvent('question_answered', { question: 'dynamic', answer: answers.dynamic });
-      step++; renderProgress(); advanceTo('dynamic');
+      const label = parsed.options[parseInt(btn.dataset.i)];
+      answers[key] = label;
+      history.push({ question: parsed.question, answer: label });
+      trackEvent('question_answered', { question: key, answer: label, bucket, step: n });
+      advance(n);
     });
   });
 }
@@ -236,11 +340,9 @@ async function generateReflection() {
   renderReflection(reflection, matchTestimonials(2));
 }
 
-function fallback() { return "You have been carrying this quietly for a while. That is exactly who this was built for."; }
+function fallback() { return "This is already who you are, you've just been the only one who hadn't seen it properly yet. That's not a gap to close, it's simply a truth that hasn't been witnessed. This space exists so that it finally can be."; }
 
-function photoTile(t) {
-  return t.image ? `<img src="${t.image}" alt="">` : `<span>Photo of ${t.name}</span>`;
-}
+function photoTile(t) { return t.image ? `<img src="${t.image}" alt="">` : `<span>Photo of ${t.name}</span>`; }
 
 function renderReflection(reflection, matches) {
   const card = document.getElementById('card');
@@ -260,7 +362,7 @@ function renderReflection(reflection, matches) {
 function renderSensitiveReflection() {
   document.getElementById('card').innerHTML = `
     <div class="kicker">Here's what we're hearing</div>
-    <div class="reflection-box"><p>Whatever this moment holds for you, you do not have to carry it alone.</p></div>
+    <div class="reflection-box"><p>Whatever this moment holds for you, it doesn't need to be a big thing to matter. Some people come to this feeling steady, some come feeling anything but, and both are simply true. This space exists to witness whichever one you are today.</p></div>
     <p class="subcopy" style="margin-bottom:20px;">You're not the only one who's felt this. It's exactly why this space exists.</p>
     <div class="testimonial-card"><div class="avatar">${SENSITIVE_TESTIMONIAL.name[0]}</div><div class="testimonial-text"><strong>${SENSITIVE_TESTIMONIAL.name}</strong>: "${SENSITIVE_TESTIMONIAL.line}"</div></div>
     <div class="btn-row" style="margin-top:26px;"><button class="cta-btn" id="continueBtn">Keep going</button></div>
@@ -273,11 +375,14 @@ function renderReassure(excludeNames) {
   document.getElementById('card').innerHTML = `
     <div class="kicker">Before anything else</div>
     <h1>No pressure. Truly.</h1>
+    <p class="subcopy">${MOTIVE_LINES[motiveType] || MOTIVE_LINES.self}</p>
     <ul class="reassure-list">
       <li><strong>Consent and privacy come first.</strong> Nothing about your session is shared without your say so.</li>
       <li><strong>You do not need to be a model.</strong> Whatever your shape, whatever your size, that is the whole point.</li>
-      <li><strong>Merv holds every call himself.</strong> Fifteen minutes, no script, no sales pitch, just a safe space for the two of you to connect and for you to ask what is on your mind.</li>
+      <li><strong>On the call:</strong> fifteen minutes with Merv himself. You'll talk through what's on your mind, look at dates that work, and ask anything at all. Nothing gets booked on the spot unless you want it to.</li>
+      <li><strong>If you don't love your photos, we make it right.</strong> That's the promise, not just a saying.</li>
     </ul>
+    <p class="trust-line" style="margin-bottom:22px;">${PROOF_POINTS}</p>
     <div class="btn-row"><button class="cta-btn" id="callBtn">Find me a time</button><button class="cta-secondary" id="storiesBtn">Show me more stories first</button></div>
   `;
   document.getElementById('callBtn').addEventListener('click', renderEmailForm);
@@ -327,9 +432,16 @@ function renderConfirm() {
   document.getElementById('restartBtn2').addEventListener('click', resetQuiz);
 }
 
-function resetQuiz() { trackEvent('quiz_restarted'); answers = {}; bucket = 'standard'; step = 0; renderIntro(); }
+function resetQuiz() {
+  trackEvent('quiz_restarted');
+  answers = {}; history = []; bucket = 'standard'; motiveType = 'self'; step = 1; dynamicCache = {};
+  renderProgress();
+  renderStep(1);
+}
 
-renderIntro();
+trackEvent('quiz_started');
+renderProgress();
+renderStep(1);
 </script>
 </body>
 </html>
