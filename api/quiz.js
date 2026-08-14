@@ -9,7 +9,15 @@ Words to reach for when natural: return, reclaim, remember, witness, softness, p
 
 Words to never use: sexy, goddess, boss, glow-up, fearless, empowered, flawless, journey.
 
-Formatting rule: never use an em dash character in the output. Use a comma, a period, or a colon instead.`;
+Formatting rule: never use an em dash character in the output. Use a comma, a period, or a colon instead.
+
+Content rule: sessions are one on one between the client and Merv. Never suggest or imply bringing a friend, partner, or anyone else along to the session.
+
+Emotional rule, this is the most important one: always speak to a person's truth, never to their pain. Do not frame anything around what someone has been missing, carrying, avoiding, or what it has cost them to wait. That framing centres deficit and makes someone the subject of pity. Instead, speak to what is already true about them right now, and treat the session as simply witnessing that truth, not fixing or healing something broken. If in doubt, write the sentence as if speaking to someone who is already whole and simply ready to be seen, not someone who has been suffering.`;
+
+function buildHistoryText(history) {
+  return history.map((h, i) => `${i + 1}. Q: "${h.question}"  A: "${h.answer}"`).join('\n');
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -17,39 +25,34 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { action, answers } = req.body || {};
-  if (!action || !answers) {
-    res.status(400).json({ error: 'Missing action or answers' });
+  const { action, history } = req.body || {};
+  if (!action || !Array.isArray(history)) {
+    res.status(400).json({ error: 'Missing action or history' });
     return;
   }
 
   let prompt;
+  const historyText = buildHistoryText(history);
 
-  if (action === 'dynamic_question') {
+  if (action === 'next_question') {
     prompt = `${VOICE_GUIDE}
 
-You are writing ONE quiz question, live, for a visitor partway through the Choose Your Journey quiz.
+You are writing ONE quiz question, live, for a visitor partway through the Choose Your Journey quiz. Here is everything they have answered so far, in order:
 
-They've answered so far:
-- Why they're here: "${answers.motive}"
-- How they describe themselves: "${answers.body}"
-- What's held them back: "${answers.block}"
+${historyText}
 
-Write a short, specific follow up question (max 14 words) that genuinely builds on their last answer, not a generic one. Then write exactly 4 short closed choice options (max 8 words each). No open text.
+Write a short, specific next question (max 14 words) that genuinely builds on their answers so far, going one layer deeper or somewhere new, never repeating ground already covered. Then write exactly 4 short closed choice options (max 8 words each). No open text.
 
 Respond ONLY with valid JSON, no markdown fences, no preamble, in exactly this shape:
 {"question": "...", "options": ["...", "...", "...", "..."]}`;
   } else if (action === 'reflection') {
     prompt = `${VOICE_GUIDE}
 
-A visitor just finished the Choose Your Journey quiz. Their answers:
-- Why they're here: "${answers.motive}"
-- How they describe themselves: "${answers.body}"
-- What's held them back: "${answers.block}"
-- Their personalised answer: "${answers.dynamic}"
-- What would feel like ease at the end: "${answers.win}"
+A visitor just finished the Choose Your Journey quiz. Here is their full path, in order:
 
-Write exactly ONE sentence, max 20 words, second person, that shows we understood their specific answers, not generic encouragement. No exclamation points. No sales language, no mention of booking or pricing. Plain text only, no markdown, no quotes.`;
+${historyText}
+
+Write exactly THREE sentences, max 65 words total, second person, that shows genuine understanding built from their whole path, not just the last answer. Remember the emotional rule above: speak to their truth, not their pain. The first sentence should name something true about them, not something they lack. The second should affirm that truth further. The third should gently open a door toward the session itself as a place that truth gets witnessed, without selling anything. No exclamation points. No sales language, no mention of booking or pricing. Plain text only, no markdown, no quotes.`;
   } else {
     res.status(400).json({ error: 'Unknown action' });
     return;
